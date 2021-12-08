@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CodesController } from './codes/codes.controller';
 import { CodesService } from './codes/codes.service';
+import { CodeInfo } from './entity/CodeInfo';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { CodesService } from './codes/codes.service';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [],
+      entities: [CodeInfo],
       synchronize: false,
     }),
   ],
