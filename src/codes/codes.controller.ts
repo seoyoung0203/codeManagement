@@ -5,19 +5,19 @@ import {
   Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
-  Put,
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { Code } from './code.interface';
+import { CreateCode, UpdateCode } from './code.interface';
 import { CodesService } from './codes.service';
 
 @Controller('codes')
 export class CodesController {
   constructor(private codesService: CodesService) {}
   @Post()
-  async createCode(@Res() res: Response, @Body() createCodeData: Code) {
+  async createCode(@Res() res: Response, @Body() createCodeData: CreateCode) {
     await this.codesService.create(createCodeData);
     res.status(HttpStatus.CREATED).send('생성 완료');
   }
@@ -34,18 +34,19 @@ export class CodesController {
     return 'get child code';
   }
 
-  @Put(':id')
+  @Patch(':id')
   async update(
     @Res() res: Response,
     @Param('id') id: number,
-    @Body() updateCodeData: Code,
+    @Body() updateCodeData: UpdateCode,
   ) {
     await this.codesService.update(id, updateCodeData);
     res.status(HttpStatus.OK).send('업데이트 완료');
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return 'remove code';
+  async remove(@Res() res: Response, @Param('id') id: number) {
+    await this.codesService.delete(id);
+    res.status(HttpStatus.OK).send('삭제 완료');
   }
 }

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { CodeInfo } from '../entity/CodeInfo';
 import { getConnection } from 'typeorm';
-import { Code } from './code.interface';
+import { CreateCode, UpdateCode } from './code.interface';
 
 @Injectable()
 export class CodesService {
-  async create(codes: Code) {
+  async create(codes: CreateCode) {
     await getConnection()
       .createQueryBuilder()
       .insert()
@@ -14,11 +14,20 @@ export class CodesService {
       .execute();
   }
 
-  async update(id: number, updatedData: Code) {
+  async update(id: number, updatedData: UpdateCode) {
     await getConnection()
       .createQueryBuilder()
       .update(CodeInfo)
       .set(updatedData)
+      .where('id = :id', { id })
+      .execute();
+  }
+
+  async delete(id: number) {
+    await getConnection()
+      .createQueryBuilder()
+      .delete()
+      .from(CodeInfo)
       .where('id = :id', { id })
       .execute();
   }
