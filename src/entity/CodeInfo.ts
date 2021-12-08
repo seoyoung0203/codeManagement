@@ -5,9 +5,18 @@ export class CodeInfo {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column('varchar', { length: 50, unique: true })
   code: string;
 
-  @Column()
+  @Column('varchar', { length: 100 })
   name: string;
+
+  @Column('int')
+  myDepth: number;
+
+  @Column('varchar', { length: 50, nullable: true })
+  preDepthCode: string;
+
+  @Column('int')
+  sortNum: number;
 }

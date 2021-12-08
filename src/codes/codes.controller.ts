@@ -22,16 +22,17 @@ export class CodesController {
     res.status(HttpStatus.CREATED).send('생성 완료');
   }
 
-  // 부모(1개까지) 코드 가져오기
-  @Get('/parents/:id')
-  getParentCode(@Param('id') id: string): string {
-    return 'get parents code';
+  // 부모(최상위까지) 코드 가져오기
+  @Get('/parents/:code')
+  async getParentCode(@Res() res: Response, @Param('code') code: string) {
+    res.status(HttpStatus.OK).send();
   }
 
-  // 자식(마지막 depth까지) 코드 가져오기
-  @Get('/child/:id')
-  getChildCode(@Param('id') id: string): string {
-    return 'get child code';
+  // 자식 코드 가져오기
+  @Get('/child/:code')
+  async getChildCode(@Res() res: Response, @Param('code') code: string) {
+    const childCode = await this.codesService.getChildsCodeInfo(code);
+    res.status(HttpStatus.OK).send(childCode);
   }
 
   @Patch(':id')
