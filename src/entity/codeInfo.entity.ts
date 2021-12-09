@@ -14,7 +14,11 @@ export class CodeInfo {
   @Column('int')
   myDepth: number;
 
-  @Column('varchar', { length: 50, nullable: true })
+  @Column('varchar', {
+    length: 50,
+    nullable: true,
+    comment: '부모 코드의 코드 값',
+  })
   preDepthCode: string;
 
   @Column('int')
