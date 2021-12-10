@@ -1,17 +1,25 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CodesController } from './codes/codes.controller';
-import { CodesService } from './codes/codes.service';
+import { CodesModule } from './codes/codes.module';
+import { CodeInfo } from './entity/codeInfo';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(),
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: 'localhost',
+      port: 3306,
+      username: 'root',
+      password: 'root1234',
+      database: 'codeInfoManagement',
+      entities: [CodeInfo],
+      synchronize: true,
+    }),
+    CodesModule,
   ],
-  controllers: [CodesController],
-  providers: [CodesService],
 })
 export class AppModule {}
