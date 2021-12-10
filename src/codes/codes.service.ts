@@ -1,17 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { CodeInfo } from '../entity/CodeInfo';
-import { getConnection, getManager } from 'typeorm';
-import { CreateCode, UpdateCode } from './interfaces/code.interface';
+import { getConnection, getManager, Repository } from 'typeorm';
+import { CreateCodeDto } from './dto/create-code.dto';
+import { UpdateCodeDto } from './dto/update-code.dto';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class CodesService {
-  async createCodes(codes: CreateCode) {
-    await getConnection()
-      .createQueryBuilder()
-      .insert()
-      .into(CodeInfo)
-      .values([codes])
-      .execute();
+  constructor(
+    @InjectRepository(CodeInfo)
+    private codeInfoRepository: Repository<CodeInfo>,
+  ) {}
+  async createCodes(code: CreateCodeDto) {
+    this.codeInfoRepository.save(code);
   }
 
   async getMyDepth(code: string) {
@@ -41,7 +42,7 @@ export class CodesService {
     return data;
   }
 
-  async update(id: number, updatedData: UpdateCode) {
+  async update(id: number, updatedData: UpdateCodeDto) {
     await getConnection()
       .createQueryBuilder()
       .update(CodeInfo)
@@ -51,11 +52,6 @@ export class CodesService {
   }
 
   async deleteCode(id: number) {
-    await getConnection()
-      .createQueryBuilder()
-      .delete()
-      .from(CodeInfo)
-      .where('id = :id', { id })
-      .execute();
+    await this.codeInfoRepository.delete(id);
   }
 }
