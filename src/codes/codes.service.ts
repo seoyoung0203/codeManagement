@@ -16,18 +16,22 @@ export class CodesService {
     this.codeInfoRepository.save(code);
   }
 
-  async getMyCodeInfoByCode(code: string): Promise<CodeInfo> {
+  async getMyCodeInfoByCodeOrId(
+    require: { code: string } | { id: number },
+  ): Promise<CodeInfo> {
     const codeInfo = await this.codeInfoRepository.findOne({
-      where: {
-        code,
-      },
+      where: require,
     });
+
     return codeInfo;
   }
 
   async getParentsCodesInfo(code: string) {
-    const { myDepth } = await this.getMyCodeInfoByCode(code);
-
+    const mycode = await this.getMyCodeInfoByCodeOrId({ code });
+    if (!mycode) {
+      throw new Error(`'${code}' code is undifined`);
+    }
+    const { myDepth } = mycode;
     const query = this.codeInfoRepository.createQueryBuilder('codeInfo');
 
     if (myDepth > 1) {
@@ -48,7 +52,11 @@ export class CodesService {
   }
 
   async getChildsCodesInfo(code: string) {
-    const mycode = await this.getMyCodeInfoByCode(code);
+    const mycode = await this.getMyCodeInfoByCodeOrId({ code });
+
+    if (!mycode) {
+      throw new Error(`'${code}' code is undifined`);
+    }
 
     const childCodes = await this.codeInfoRepository
       .createQueryBuilder('codeInfo')
