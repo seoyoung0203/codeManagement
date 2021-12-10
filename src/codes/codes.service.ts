@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CodeInfo } from '../entity/CodeInfo';
-import { getConnection, getManager, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateCodeDto } from './dto/create-code.dto';
 import { UpdateCodeDto } from './dto/update-code.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,41 +11,60 @@ export class CodesService {
     @InjectRepository(CodeInfo)
     private codeInfoRepository: Repository<CodeInfo>,
   ) {}
-  async createCodes(code: CreateCodeDto) {
+
+  async createCodes(code: CreateCodeDto): Promise<void> {
     this.codeInfoRepository.save(code);
   }
 
-  async getMyDepth(code: string) {
-    const entityManager = getManager();
-    const depth = await entityManager.query(`
-      select myDepth from code_info where code = "${code}";
-    `);
-    return depth[0];
+  async getMyCodeInfoByCode(code: string): Promise<CodeInfo> {
+    const codeInfo = await this.codeInfoRepository.findOne({
+      where: {
+        code,
+      },
+    });
+    return codeInfo;
   }
 
-  async getChildsCodeInfo(code: string) {
-    const entityManager = getManager();
-    const data = await entityManager.query(
-      `
-      select 
-        my.code as myCodey, 
-        my.name as myCodeName,
-        child.code as childCode, 
-        child.name as childCodeName
-      from code_info as my 
-      inner join code_info as child on my.preDepthCode = child.code 
-      where my.code = ?
-      order by child.sortNum, my.sortNum;
-    `,
-      [code],
-    );
-    return data;
+  async getParentsCodesInfo(code: string) {
+    const { myDepth } = await this.getMyCodeInfoByCode(code);
+
+    const query = this.codeInfoRepository.createQueryBuilder('codeInfo');
+
+    if (myDepth > 1) {
+      for (let i = 1; i < myDepth; i++) {
+        const joinTable =
+          i == 1
+            ? `codeInfo.parentsCodeInfo`
+            : `parents${i - 1}.parentsCodeInfo`;
+        query.leftJoinAndSelect(joinTable, `parents${i}`);
+      }
+    }
+
+    const parentsCodes = await query
+      .where('codeInfo.code = :code', { code })
+      .getOne();
+
+    return parentsCodes;
   }
 
-  async update(id: number, updatedData: UpdateCodeDto) {
-    await getConnection()
+  async getChildsCodesInfo(code: string) {
+    const mycode = await this.getMyCodeInfoByCode(code);
+
+    const childCodes = await this.codeInfoRepository
+      .createQueryBuilder('codeInfo')
+      .where('codeInfo.parentsCodeInfoId = :parentsCodeInfoId', {
+        parentsCodeInfoId: mycode.id,
+      })
+      .orderBy('codeInfo.sortNum')
+      .getMany();
+
+    return childCodes;
+  }
+
+  async update(id: number, updatedData: UpdateCodeDto): Promise<void> {
+    await this.codeInfoRepository
       .createQueryBuilder()
-      .update(CodeInfo)
+      .update()
       .set(updatedData)
       .where('id = :id', { id })
       .execute();

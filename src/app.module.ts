@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CodesModule } from './codes/codes.module';
-import { CodeInfo } from './entity/codeInfo';
 
 @Module({
   imports: [
@@ -16,8 +15,8 @@ import { CodeInfo } from './entity/codeInfo';
       username: 'root',
       password: 'root1234',
       database: 'codeInfoManagement',
-      entities: [CodeInfo],
-      synchronize: true,
+      entities: [__dirname + '/entity/*.js'],
+      synchronize: false,
     }),
     CodesModule,
   ],

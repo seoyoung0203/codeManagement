@@ -27,14 +27,14 @@ export class CodesController {
   // 부모(최상위까지) 코드 가져오기
   @Get('/parents/:code')
   async getParentCode(@Res() res: Response, @Param('code') code: string) {
-    // const parentsCodes = await this.codesService.getParentsCodesInfo(code);
-    // res.status(HttpStatus.OK).send(parentsCodes);
+    const parentsCodes = await this.codesService.getParentsCodesInfo(code);
+    res.status(HttpStatus.OK).send(parentsCodes);
   }
 
   // 자식 코드 가져오기
   @Get('/child/:code')
   async getChildCode(@Res() res: Response, @Param('code') code: string) {
-    const childCode = await this.codesService.getChildsCodeInfo(code);
+    const childCode = await this.codesService.getChildsCodesInfo(code);
     res.status(HttpStatus.OK).send(childCode);
   }
 

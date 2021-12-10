@@ -1,6 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
-@Entity('codeInfo', { schema: 'testData' })
+@Entity('codeInfo')
 export class CodeInfo {
   @PrimaryGeneratedColumn()
   id: number;
@@ -14,12 +20,11 @@ export class CodeInfo {
   @Column('int')
   myDepth: number;
 
-  @Column('varchar', {
-    length: 50,
-    nullable: true,
-    comment: '부모 코드의 코드 값',
-  })
-  preDepthCode: string;
+  @ManyToOne(() => CodeInfo, (codeInfo) => codeInfo.childCodeInfo)
+  parentsCodeInfo: CodeInfo;
+
+  @OneToMany(() => CodeInfo, (codeInfo) => codeInfo.parentsCodeInfo)
+  childCodeInfo: CodeInfo[];
 
   @Column('int')
   sortNum: number;
