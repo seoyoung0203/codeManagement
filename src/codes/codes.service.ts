@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { CodeInfo } from '../entity/CodeInfo';
 import { getConnection, getManager } from 'typeorm';
-import { CreateCode, UpdateCode } from './code.interface';
+import { CreateCode, UpdateCode } from './interfaces/code.interface';
 
 @Injectable()
 export class CodesService {
-  async create(codes: CreateCode) {
+  async createCodes(codes: CreateCode) {
     await getConnection()
       .createQueryBuilder()
       .insert()
@@ -50,7 +50,7 @@ export class CodesService {
       .execute();
   }
 
-  async delete(id: number) {
+  async deleteCode(id: number) {
     await getConnection()
       .createQueryBuilder()
       .delete()
