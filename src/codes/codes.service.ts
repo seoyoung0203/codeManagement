@@ -41,13 +41,7 @@ export class CodesService {
     const { myDepth } = mycode;
     const query = this.codeInfoRepository
       .createQueryBuilder('codeInfo')
-      .select([
-        'codeInfo.id',
-        'codeInfo.code',
-        'codeInfo.name',
-        'codeInfo.myDepth',
-        'codeInfo.sortNum',
-      ]);
+      .select(['codeInfo.id', 'codeInfo.code', 'codeInfo.name']);
 
     if (myDepth > 1) {
       for (let i = 1; i < myDepth; i++) {

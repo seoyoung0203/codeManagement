@@ -12,7 +12,5 @@ export interface ParentsCodesInfo {
   id: number;
   code: string;
   name: string;
-  myDepth: number;
-  sortNum: number;
   parentsCodeInfo: CodeInfo;
 }
