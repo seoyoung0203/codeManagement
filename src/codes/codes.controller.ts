@@ -24,29 +24,29 @@ export class CodesController {
       await this.codesService.createCodes(createCodeDto);
       res.status(HttpStatus.CREATED).send('생성 완료');
     } catch (e) {
-      res.status(500).send(e.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(e.message);
     }
   }
 
   // 부모(최상위까지) 코드 가져오기
-  @Get('/parents/:code')
+  @Get('/:code/parentscodes')
   async getParentCode(@Res() res: Response, @Param('code') code: string) {
     try {
       const parentsCodes = await this.codesService.getParentsCodesInfo(code);
-      res.status(HttpStatus.OK).send(parentsCodes);
+      res.status(HttpStatus.OK).json({ result: parentsCodes });
     } catch (e) {
-      res.status(500).send(e.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(e.message);
     }
   }
 
   // 자식 코드 가져오기
-  @Get('/child/:code')
+  @Get('/:code/childcodes')
   async getChildCode(@Res() res: Response, @Param('code') code: string) {
     try {
-      const childCode = await this.codesService.getChildsCodesInfo(code);
-      res.status(HttpStatus.OK).send(childCode);
+      const childCodes = await this.codesService.getChildCodesInfo(code);
+      res.status(HttpStatus.OK).json({ result: childCodes });
     } catch (e) {
-      res.status(500).send(e.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(e.message);
     }
   }
 
@@ -57,26 +57,34 @@ export class CodesController {
     @Body() updateCodeData: UpdateCodeDto,
   ) {
     try {
-      const codeInfo = await this.codesService.getMyCodeInfoByCodeOrId({ id });
-      if (!codeInfo) return res.status(500).send('No Update Data');
+      const codeInfo = await this.codesService.getMyCodeInfoByCodeOrId(
+        null,
+        id,
+      );
+      if (!codeInfo)
+        return res.status(HttpStatus.NOT_FOUND).send('No Update Data');
 
       await this.codesService.update(id, updateCodeData);
       res.status(HttpStatus.OK).send('업데이트 완료');
     } catch (e) {
-      res.status(500).send(e.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(e.message);
     }
   }
 
   @Delete(':id')
   async remove(@Res() res: Response, @Param('id', ParseIntPipe) id: number) {
     try {
-      const codeInfo = await this.codesService.getMyCodeInfoByCodeOrId({ id });
-      if (!codeInfo) return res.status(500).send('No Delete Data');
+      const codeInfo = await this.codesService.getMyCodeInfoByCodeOrId(
+        null,
+        id,
+      );
+      if (!codeInfo)
+        return res.status(HttpStatus.NOT_FOUND).send('No Delete Data');
 
       await this.codesService.deleteCode(id);
       res.status(HttpStatus.OK).send('삭제 완료');
     } catch (e) {
-      res.status(500).send(e.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(e.message);
     }
   }
 }

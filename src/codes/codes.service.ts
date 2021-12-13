@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateCodeDto } from './dto/create-code.dto';
 import { UpdateCodeDto } from './dto/update-code.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ChildCodesInfo, ParentsCodes } from './interfaces/code.interface';
 
 @Injectable()
 export class CodesService {
@@ -12,22 +13,24 @@ export class CodesService {
     private codeInfoRepository: Repository<CodeInfo>,
   ) {}
 
-  async createCodes(code: CreateCodeDto): Promise<void> {
-    this.codeInfoRepository.save(code);
+  async createCodes(code: CreateCodeDto) {
+    await this.codeInfoRepository.save(code);
   }
 
   async getMyCodeInfoByCodeOrId(
-    require: { code: string } | { id: number },
-  ): Promise<CodeInfo> {
+    code?: string,
+    id?: number,
+  ): Promise<{ id: number; myDepth: number }> {
     const codeInfo = await this.codeInfoRepository.findOne({
-      where: require,
+      select: ['id', 'myDepth'],
+      where: code ? { code } : { id },
     });
 
     return codeInfo;
   }
 
-  async getParentsCodesInfo(code: string) {
-    const mycode = await this.getMyCodeInfoByCodeOrId({ code });
+  async getParentsCodesInfo(code: string): Promise<ParentsCodes> {
+    const mycode = await this.getMyCodeInfoByCodeOrId(code);
     if (!mycode) {
       throw new Error(`'${code}' code is undifined`);
     }
@@ -51,8 +54,8 @@ export class CodesService {
     return parentsCodes;
   }
 
-  async getChildsCodesInfo(code: string) {
-    const mycode = await this.getMyCodeInfoByCodeOrId({ code });
+  async getChildCodesInfo(code: string): Promise<ChildCodesInfo[]> {
+    const mycode = await this.getMyCodeInfoByCodeOrId(code);
 
     if (!mycode) {
       throw new Error(`'${code}' code is undifined`);
@@ -60,6 +63,13 @@ export class CodesService {
 
     const childCodes = await this.codeInfoRepository
       .createQueryBuilder('codeInfo')
+      .select([
+        'codeInfo.id',
+        'codeInfo.code',
+        'codeInfo.name',
+        'codeInfo.myDepth',
+        'codeInfo.sortNum',
+      ])
       .where('codeInfo.parentsCodeInfoId = :parentsCodeInfoId', {
         parentsCodeInfoId: mycode.id,
       })
@@ -69,7 +79,7 @@ export class CodesService {
     return childCodes;
   }
 
-  async update(id: number, updatedData: UpdateCodeDto): Promise<void> {
+  async update(id: number, updatedData: UpdateCodeDto) {
     await this.codeInfoRepository
       .createQueryBuilder()
       .update()
