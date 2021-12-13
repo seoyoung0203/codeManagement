@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CodeInfo } from '../entity/CodeInfo';
 import { Repository } from 'typeorm';
 import { CreateCodeDto } from './dto/create-code.dto';
@@ -13,8 +17,10 @@ export class CodesService {
     private codeInfoRepository: Repository<CodeInfo>,
   ) {}
 
-  async createCode(code: CreateCodeDto) {
-    await this.codeInfoRepository.save(code);
+  async createCode(createCodeDto: CreateCodeDto) {
+    if (await this.getMyCodeInfoByCodeOrId(createCodeDto.code, null))
+      throw new BadRequestException('중복된 코드입니다');
+    await this.codeInfoRepository.save(createCodeDto);
   }
 
   async getMyCodeInfoByCodeOrId(
@@ -31,9 +37,7 @@ export class CodesService {
 
   async getParentsCodesInfo(code: string): Promise<ParentsCodesInfo> {
     const mycode = await this.getMyCodeInfoByCodeOrId(code);
-    if (!mycode) {
-      throw new Error(`'${code}' code is undifined`);
-    }
+    if (!mycode) throw new NotFoundException();
     const { myDepth } = mycode;
     const query = this.codeInfoRepository
       .createQueryBuilder('codeInfo')
@@ -72,10 +76,7 @@ export class CodesService {
 
   async getChildCodesInfo(code: string): Promise<ChildCodesInfo[]> {
     const mycode = await this.getMyCodeInfoByCodeOrId(code);
-
-    if (!mycode) {
-      throw new Error(`'${code}' code is undifined`);
-    }
+    if (!mycode) throw new NotFoundException();
 
     const childCodes = await this.codeInfoRepository
       .createQueryBuilder('codeInfo')
