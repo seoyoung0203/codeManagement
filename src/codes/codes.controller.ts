@@ -21,7 +21,16 @@ export class CodesController {
   @Post()
   async createCode(@Res() res: Response, @Body() createCodeDto: CreateCodeDto) {
     try {
-      await this.codesService.createCodes(createCodeDto);
+      if (createCodeDto.parentsCodeInfo) {
+        const inputParentsCode =
+          await this.codesService.getMyCodeInfoByCodeOrId(
+            null,
+            createCodeDto.parentsCodeInfo.id,
+          );
+        if (!inputParentsCode)
+          return res.status(404).send('부모 코드가 존재하지 않습니다');
+      }
+      await this.codesService.createCode(createCodeDto);
       res.status(HttpStatus.CREATED).send('생성 완료');
     } catch (e) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(e.message);

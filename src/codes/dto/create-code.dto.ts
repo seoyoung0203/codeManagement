@@ -1,5 +1,4 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
-import { CodeInfo } from 'src/entity/codeInfo';
 
 export class CreateCodeDto {
   @IsString()
@@ -12,7 +11,7 @@ export class CreateCodeDto {
   myDepth: number;
 
   @IsOptional()
-  parentsCodeInfo?: CodeInfo;
+  parentsCodeInfo?: { id: number };
 
   @IsNumber()
   sortNum: number;

@@ -20,11 +20,11 @@ export class CodeInfo {
   @Column('int')
   myDepth: number;
 
-  @ManyToOne(() => CodeInfo, (codeInfo) => codeInfo.childCodeInfo)
+  @ManyToOne(() => CodeInfo, (codeInfo) => codeInfo.childCodesInfo)
   parentsCodeInfo: CodeInfo;
 
   @OneToMany(() => CodeInfo, (codeInfo) => codeInfo.parentsCodeInfo)
-  childCodeInfo: CodeInfo[];
+  childCodesInfo: CodeInfo[];
 
   @Column('int')
   sortNum: number;

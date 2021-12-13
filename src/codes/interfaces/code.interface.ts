@@ -8,7 +8,7 @@ export interface ChildCodesInfo {
   sortNum: number;
 }
 
-export interface ParentsCodes {
+export interface ParentsCodesInfo {
   id: number;
   code: string;
   name: string;

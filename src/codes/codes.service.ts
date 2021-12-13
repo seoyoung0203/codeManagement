@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateCodeDto } from './dto/create-code.dto';
 import { UpdateCodeDto } from './dto/update-code.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ChildCodesInfo, ParentsCodes } from './interfaces/code.interface';
+import { ChildCodesInfo, ParentsCodesInfo } from './interfaces/code.interface';
 
 @Injectable()
 export class CodesService {
@@ -13,7 +13,7 @@ export class CodesService {
     private codeInfoRepository: Repository<CodeInfo>,
   ) {}
 
-  async createCodes(code: CreateCodeDto) {
+  async createCode(code: CreateCodeDto) {
     await this.codeInfoRepository.save(code);
   }
 
@@ -29,13 +29,21 @@ export class CodesService {
     return codeInfo;
   }
 
-  async getParentsCodesInfo(code: string): Promise<ParentsCodes> {
+  async getParentsCodesInfo(code: string): Promise<ParentsCodesInfo> {
     const mycode = await this.getMyCodeInfoByCodeOrId(code);
     if (!mycode) {
       throw new Error(`'${code}' code is undifined`);
     }
     const { myDepth } = mycode;
-    const query = this.codeInfoRepository.createQueryBuilder('codeInfo');
+    const query = this.codeInfoRepository
+      .createQueryBuilder('codeInfo')
+      .select([
+        'codeInfo.id',
+        'codeInfo.code',
+        'codeInfo.name',
+        'codeInfo.myDepth',
+        'codeInfo.sortNum',
+      ]);
 
     if (myDepth > 1) {
       for (let i = 1; i < myDepth; i++) {
@@ -43,7 +51,15 @@ export class CodesService {
           i == 1
             ? `codeInfo.parentsCodeInfo`
             : `parents${i - 1}.parentsCodeInfo`;
-        query.leftJoinAndSelect(joinTable, `parents${i}`);
+        query
+          .leftJoinAndSelect(joinTable, `parents${i}`)
+          .addSelect([
+            `parents${i}.id`,
+            `parents${i}.code`,
+            `parents${i}.name`,
+            `parents${i}.myDepth`,
+            `parents${i}.sortNum`,
+          ]);
       }
     }
 
