@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { CreateCodeDto } from './dto/create-code.dto';
 import { UpdateCodeDto } from './dto/update-code.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ChildCodesInfo, ParentsCodesInfo } from './interfaces/code.interface';
+import { ChildCodes, ParentsCodes } from './interfaces';
 
 @Injectable()
 export class CodesService {
@@ -35,7 +35,7 @@ export class CodesService {
     return codeInfo;
   }
 
-  async getParentsCodesInfo(code: string): Promise<ParentsCodesInfo> {
+  async getParentsCodesInfo(code: string): Promise<ParentsCodes> {
     const mycode = await this.getMyCodeInfoByCodeOrId(code);
     if (!mycode) throw new NotFoundException();
     const { myDepth } = mycode;
@@ -68,7 +68,7 @@ export class CodesService {
     return parentsCodes;
   }
 
-  async getChildCodesInfo(code: string): Promise<ChildCodesInfo[]> {
+  async getChildCodesInfo(code: string): Promise<ChildCodes[]> {
     const mycode = await this.getMyCodeInfoByCodeOrId(code);
     if (!mycode) throw new NotFoundException();
 
